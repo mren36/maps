@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title>Starbucks Locations</title>
+    <link href="mapstyle.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+<script src='https://d3js.org/d3.v4.min.js'></script>
+
+<div id ="container">
+  <header>
+    <h1>STARBUCKS COFFEE U.S. LOCATIONS</h1>
+  </header>
+	<p>
+		The following is a map of all of the Starbucks locations in the US. Click on a location to see its information. Alternatively, search for a store by its Store Number.
+	</p>
+</div>
+<div id ="container2">
+<p>
+    So the above map tells us where all the Starbucks are and lets us search for them. From the map, we can observe a few trends about Starbucks. Locations seem to be concentrated near the coasts and bigger cities, and there are very few in the Dakotas and surrounding states. Surprisingly, Hawaii has a lot more Starbucks than you'd expect! Unforuntately, this map does not really let us see the amount of Starbucks stores in a place, just that it is there. To account for that, we have the following map, which shows a gradient of green for how concentrated Starbucks is in a place.
+</p>
+</div>
+<div id ="container3">
+</div>
+<script>
+const width = 1000,
+      height = 700,
+      height2 = 600,
+      margin = {
+          top: 10,
+          bottom: 10,
+          left: 10,
+          right: 10,
+      };
+
+var projection = d3.geoAlbersUsa();
+
+var path = d3.geoPath()
+             .projection(projection);
+
+var svg = d3.select("#container").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .style("margin", "0 auto")
+    .style("display", "block")
+
+d3.json("us_states.json", function(error_json, dataset_json) {
+    svg.selectAll("path")
+      .data(dataset_json.features)
+      .enter()
+      .append("path")
+      .attr("d", path)
+})
+
+var svg2 = d3.select("#container2").append("svg")
+    .attr("width", width)
+    .attr("height", height2)
+    .style("margin", "0 auto")
+    .style("display", "block")
+
+d3.json("us_states.json", function(error_json, dataset_json) {
+    svg2.selectAll("path")
+      .data(dataset_json.features)
+      .enter()
+      .append("path")
+      .attr("d", path)
+})
+
+var svg3 = d3.select("#container3").append("svg")
+    .attr("width", width)
+    .attr("height", height2)
+    .style("margin", "0 auto")
+    .style("display", "block")
+
+d3.json("us_states.json", function(error_json, dataset_json) {
+    svg3.selectAll("path")
+      .data(dataset_json.features)
+      .enter()
+      .append("path")
+      .attr("d", path)
+})
+
+d3.csv("starbucks.csv", function(error, data) {
+		svg.selectAll("circle")
+			.data(data)
+			.enter()
+			.append("circle")
+			.attr("cx", function(d) {return projection([d.Longitude, d.Latitude])[0]})
+			.attr("cy", function(d) {return projection([d.Longitude, d.Latitude])[1]})
+			.attr("r", 2)
+      .attr("id", function(d, i) {return "c" + i})
+			.on("click", function(d) {
+				svg.selectAll(".s")
+					.transition()
+					.duration(1000)
+					.attr("r", 0)
+
+				svg.append("circle")
+  				.attr("cx",  projection([d.Longitude, d.Latitude])[0])
+  				.attr("cy", projection([d.Longitude, d.Latitude])[1])
+  				.attr("r", 0)
+  				.style("fill", "red")
+  				.attr("opacity", 0.7)
+  				.attr("class", "s")
+  				.transition()
+  				.duration(1000)
+  				.attr("r", 5)
+
+        d3.select("#snum")
+          .text(d.StoreNumber)
+
+        d3.select("#snam")
+          .text(d.StoreName)
+
+        d3.select("#addr")
+          .text(d.StreetAddress)
+
+        d3.select("#city")
+          .text(d.City + ", " + d.StateProvince + ", " + d.Postcode)
+			})
+
+      svg.append("text")
+          .attr("text-anchor", "end")
+      		.attr("x", 200)
+      		.attr("y", 600)
+      		.text("Store Number:")
+
+      svg.append("text")
+          .attr("text-anchor", "end")
+          .attr("x", 200)
+          .attr("y", 625)
+          .text("Store Name:")
+
+      svg.append("text")
+          .attr("text-anchor", "end")
+          .attr("x", 200)
+          .attr("y", 650)
+          .text("Address:")
+
+      svg.append("text")
+          .attr("x", 205)
+          .attr("y", 600)
+          .attr("id", "snum")
+
+      svg.append("text")
+          .attr("x", 205)
+          .attr("y", 625)
+          .attr("id", "snam")
+
+      svg.append("text")
+          .attr("x", 205)
+          .attr("y", 650)
+          .attr("id", "addr")
+
+      svg.append("text")
+          .attr("x", 205)
+          .attr("y", 675)
+          .attr("id", "city")
+
+      var innerDiv = svg.append("foreignObject")
+                        .attr("x", 500)
+                        .attr("y", 590)
+                        .attr("width", 300)
+                        .attr("height", 125)
+                        .append("xhtml:div")
+                        .attr("xmlns", "http://www.w3.org/1999/xhtml")
+
+      innerDiv.text("Search by Store Number")
+
+      innerDiv.append("xhtml:input")
+                .attr("type", "text")
+                .attr("id", "si")
+
+      innerDiv.append("xhtml:input")
+                .attr("type", "submit")
+                .attr("value", "Search")
+                .on("click", function() {
+                  var index = data.findIndex(function(d) {return d.StoreNumber == d3.select("#si").property("value")})
+                  svg.selectAll(".s")
+          					.transition()
+          					.duration(1000)
+          					.attr("r", 0)
+
+          				svg.append("circle")
+            				.attr("cx",  d3.select("#c" + index).attr("cx"))
+            				.attr("cy", d3.select("#c" + index).attr("cy"))
+            				.attr("r", 0)
+            				.style("fill", "red")
+            				.attr("opacity", 0.7)
+            				.attr("class", "s")
+            				.transition()
+            				.duration(1000)
+            				.attr("r", 5)
+
+                  d3.select("#snum")
+                    .text(data[index].StoreNumber)
+
+                  d3.select("#snam")
+                    .text(data[index].StoreName)
+
+                  d3.select("#addr")
+                    .text(data[index].StreetAddress)
+
+                  d3.select("#city")
+                    .text(data[index].City + ", " + data[index].StateProvince + ", " + data[index].Postcode)
+                })
+
+d3.select("#container").append("div").append("p").text("Don't know the Store Number? Have no fear! Search for the Store Number by zip code:")
+
+d3.select("#container").append("input")
+                          .attr("type", "text")
+                          .attr("id", "zi")
+
+d3.select("#container").append("input")
+                          .attr("type", "submit")
+                          .attr("value", "Search")
+                          .on("click", function() {
+                            d3.select("#zp")
+                              .text("\nStore Numbers:")
+                            for (i = 0; i < 13608; i++)
+                              if (data[i].Postcode == d3.select("#zi").property("value"))
+                                d3.select("#zp")
+                                  .text(d3.select("#zp").text() + " " + data[i].StoreNumber)
+                          })
+
+d3.select("#container").append("text")
+                          .attr("id", "zp")
+                          .text("\nStore Numbers: ")
+
+svg2.selectAll("circle")
+  .data(data)
+  .enter()
+  .append("circle")
+  .attr("cx", function(d) {return projection([d.Longitude, d.Latitude])[0]})
+  .attr("cy", function(d) {return projection([d.Longitude, d.Latitude])[1]})
+  .attr("r", 1)
+  .attr("opacity", 0.1)
+
+d3.select("#container2").append("p")
+                          .text("Now, we can see that most of the Starbucks are scattered about, and the \"hotspots\" of Starbucks are now apparent. LA is the clear winner here, with a solid green blotch that covers hundreds of square miles. We can also see some other cities that have a high concentration: Miami, Seattle, Boston, and so on. It's quite natural that there are lots of Starbucks in places where there are lots of people. But are there disproportionately many? Let's find out by taking local population into account, specifically the population of the zip-code area, with the gradient. This results in the following Starbucks per capita map.")
+
+svg3.selectAll("circle")
+  .data(data)
+  .enter()
+  .append("circle")
+  .attr("cx", function(d) {return projection([d.Longitude, d.Latitude])[0]})
+  .attr("cy", function(d) {return projection([d.Longitude, d.Latitude])[1]})
+  .attr("r", 1)
+  .attr("opacity", function(d) {return 0.1*20000/(d.Population)})
+
+d3.select("#container3").append("p")
+                          .text("Now, the dots in the less concentrated areas are much more pronounced, suggesting that Starbucks is giving those areas its fair share considering the amount of people there. However, big cities are really getting a lot of Starbucks compared to everyone else, though the difference is less than before. Looks like frappucinos and macchiatos are in high demand among movie stars!")
+})
+</script>
+</body>
+</html>

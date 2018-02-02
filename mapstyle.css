@@ -1,0 +1,33 @@
+img {width:100px;}
+body {font-family: sans-serif;}
+h1 {font-family: verdana; color: white}
+header
+{
+  background-color: green;
+  width: 80%;
+  margin: 0 auto;
+  text-align: center;
+}
+header img, h1
+{
+  display: inline;
+  vertical-align: middle;
+  margin: 0 auto;
+  text-align: center;
+}
+main
+{
+  background-color: rgb(230, 230, 230);
+  width: 80%;
+  margin: 0 auto;
+  text-align: center;
+}
+path
+{
+  fill: white;
+  stroke: lightgrey;
+}
+circle
+{
+  fill: green;
+}
